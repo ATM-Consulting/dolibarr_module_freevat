@@ -59,30 +59,58 @@ class ActionsFreeVAT
 	 * @param   HookManager     $hookmanager    Hook manager propagated to allow calling another hook
 	 * @return  int                             < 0 on error, 0 on success, 1 to replace standard code
 	 */
-	function doActions($parameters, &$object, &$action, $hookmanager)
+	function formObjectOptions($parameters, &$object, &$action, $hookmanager)
 	{
-		$error = 0; // Error counter
-		$myvalue = 'test'; // A result value
+		$TContext = explode(':', $parameters['context']);
 
-		print_r($parameters);
-		echo "action: " . $action;
-		print_r($object);
-
-		if (in_array('somecontext', explode(':', $parameters['context'])))
+		if (in_array('propalcard', $TContext)
+				|| in_array('ordercard', $TContext)
+				|| in_array('invoicecard', $TContext)
+				|| in_array('ordersuppliercard', $TContext)
+				|| in_array('invoicesuppliercard', $TContext)
+				)
 		{
-		  // do something only for the context 'somecontext'
+
+			$default_vat_tx = 0;
+			if($action === 'editline' && !empty($parameters['lineid'])) {
+				foreach($object->lines as &$line) {
+					if($line->id == $parameters['lineid']) {
+						$default_vat_tx = $line->tva_tx;
+					}
+				}
+
+			}
+
+			?>
+			<script type="text/javascript">
+			$(document).ready(function() {
+
+				<?php
+				if(in_array('invoicesuppliercard', $TContext)) {
+					?>
+					/*TODO Ne marche pas, parce que le TTC est tout de même recalculé derrière
+					$('input#price_ttc, input#price_ht').focus(function() {
+						$(this).unbind();
+					});*/
+					<?php
+				}
+				?>
+
+				$('select#tva_tx').replaceWith(function() {
+						var tva_tx = $(this).val()>0 ? $(this).val() : <?php echo (float)$default_vat_tx ?>;
+
+						return '<input id="'+$(this).attr('id')+'" name="'+$(this).attr('name')+'" value="'+tva_tx+'" size="2" />%';
+
+				});
+
+			});
+			</script>
+
+			<?php
+
+
 		}
 
-		if (! $error)
-		{
-			$this->results = array('myreturn' => $myvalue);
-			$this->resprints = 'A text to show';
-			return 0; // or return 1 to replace standard code
-		}
-		else
-		{
-			$this->errors[] = 'Error message';
-			return -1;
-		}
+
 	}
 }

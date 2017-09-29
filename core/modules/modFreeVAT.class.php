@@ -88,7 +88,9 @@ class modFreeVAT extends DolibarrModules
 		//							'dir' => array('output' => 'othermodulename'),      // To force the default directories names
 		//							'workflow' => array('WORKFLOW_MODULE1_YOURACTIONTYPE_MODULE2'=>array('enabled'=>'! empty($conf->module1->enabled) && ! empty($conf->module2->enabled)', 'picto'=>'yourpicto@freevat')) // Set here all workflow context managed by module
 		//                        );
-		$this->module_parts = array();
+		$this->module_parts = array(
+				'hooks'=>array('propalcard','ordercard','invoicecard','ordersuppliercard','invoicesuppliercard')
+		);
 
 		// Data directories to create when module is enabled.
 		// Example: this->dirs = array("/freevat/temp");
@@ -248,7 +250,7 @@ class modFreeVAT extends DolibarrModules
 	function init($options='')
 	{
 		$sql = array();
-		
+
 		define('INC_FROM_DOLIBARR',true);
 
 		dol_include_once('/freevat/config.php');
